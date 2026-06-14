@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket & Restaurant | Taata Owen</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Service Page Custom Styles */
+        .services-banner {
+            background: var(--primary-color);
+            padding: 100px 20px 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .menu-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .tab-btn {
+            padding: 10px 25px;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Catalog Layout */
+        .catalog-container {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            background: #eaeded;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            
+        }
+        .product-img img {
+            width: 100%;
+            height: 100%;
+            object-position: center;
+        }
+
+        .product-details {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-details h3 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .product-details p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-weight: 700;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .add-to-cart-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Floating Cart Icon Trigger */
+        .cart-icon-floating {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--secondary-color);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 999;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.8rem;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* Sliding Cart Panel */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+            z-index: 1001;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.open {
+            right: 0;
+        }
+
+        .cart-header {
+            padding: 20px;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-cart {
+            cursor: pointer;
+            font-size: 1.3rem;
+        }
+
+        .cart-items-wrapper {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item-info h4 { font-size: 0.95rem; color: var(--primary-color); }
+        .cart-item-info span { font-size: 0.85rem; color: #777; }
+
+        .cart-item-remove {
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            background: #fdfefe;
+        }
+
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Blur backdrop overlay */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            display: none;
+        }
+
+        .cart-overlay.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="navbar">
+            <div class="logo">Taata Owen</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html" class="active">Shop</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="services-banner">
+        <h1>Supermarket & Restaurant Catalog</h1>
+        <p>Pick your items from our menu or fresh shelves and add them directly to your order cart.</p>
+    </div>
+
+    <!-- Filter Category Tabs -->
+    <div class="menu-tabs">
+        <button class="tab-btn active">All Items</button>
+        <button class="tab-btn">Restaurant</button>
+        <button class="tab-btn">Supermarket</button>
+    </div>
+
+    <!-- Products Catalog Grid -->
+    <main class="catalog-container">
+        
+        <!-- Product Template Card 1 -->
+        <div class="product-card">
+            <div class="product-img">
+                <img src="pilau.jpg" alt="Pilau Rice & Beef">
+                <i class="fa-solid fa-bowl-food"></i></div>
+            <div class="product-details">
+                <div>
+                    <h3>Pilau Rice & Beef</h3>
+                    <p>Delicious, aromatic spiced local beef pilau served with fresh kachumbari.</p>
+                </div>
+                <div class="product-meta">
+                    <span class="product-price">12,000 UGX</span>
+                    <button class="add-to-cart-btn" onclick="addToCart('Pilau Rice & Beef', 12000)">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Template Card 2 -->
+        <div class="product-card">
+            <div class="product-img">
+                <img src="passion juice.jpg" alt="Fresh Passion Juice (1L)">
+                <i class="fa-solid fa-bottle-water"></i></div>
+            <div class="product-details">
+                <div>
+                    <h3>Fresh Passion Juice (1L)</h3>
+                    <p>Chilled, 100% organic locally blended sweet passion fruit juice juice.</p>
+                </div>
+                <div class="product-meta">
+                    <span class="product-price">6,000 UGX</span>
+                    <button class="add-to-cart-btn" onclick="addToCart('Fresh Passion Juice (1L)', 6000)">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Template Card 3 -->
+        <div class="product-card">
+            <div class="product-img">
+                <img src="sugar.jpg" alt="Premium Sugar (1KG)">
+                <i class="fa-solid fa-cubes-stacked"></i></div>
+            <div class="product-details">
+                <div>
+                    <h3>Premium Sugar (1KG)</h3>
+                    <p>Fine granulated white table sugar packaged fresh from the store supermarket shelves.</p>
+                </div>
+                <div class="product-meta">
+                    <span class="product-price">5,500 UGX</span>
+                    <button class="add-to-cart-btn" onclick="addToCart('Premium Sugar (1KG)', 5500)">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Floating Cart Trigger Button -->
+    <div class="cart-icon-floating" id="openCartBtn">
+        <i class="fa-solid fa-basket-shopping"></i>
+        <div class="cart-count" id="cartBadgeCount">0</div>
+    </div>
+
+    <!-- Sliding Sidebar Overlay Backdrop -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- Sliding Sidebar Shopping Cart -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Your Delivery Order</h3>
+            <i class="fa-solid fa-xmark close-cart" id="closeCartBtn"></i>
+        </div>
+        
+        <!-- Cart Items List Container -->
+        <div class="cart-items-wrapper" id="cartItemsList">
+            <p style="color: #888; text-align: center; margin-top: 30px;">Your cart is empty.</p>
+        </div>
+
+        <!-- Cart Check Out Footer -->
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total Amount:</span>
+                <span id="cartTotalPrice">0 UGX</span>
+            </div>
+            <button class="checkout-btn" onclick="proceedToCheckout()">
+                Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Clean, Fixed JavaScript -->
+    <script>
+        let cart = [];
+
+        // Sidebar Open/Close Layout Controls
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartOverlay = document.getElementById('cartOverlay');
+        
+        document.getElementById('openCartBtn').addEventListener('click', () => {
+            cartSidebar.classList.add('open');
+            cartOverlay.classList.add('show');
+        });
+
+        const closeCartMenu = () => {
+            cartSidebar.classList.remove('open');
+            cartOverlay.classList.remove('show');
+        };
+        
+        document.getElementById('closeCartBtn').addEventListener('click', closeCartMenu);
+        document.getElementById('cartOverlay').addEventListener('click', closeCartMenu);
+
+        // Core Cart Calculation Processing
+        function addToCart(name, price) {
+            const existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
+            updateCartUI();
+        }
+
+        function removeCartItem(name) {
+            cart = cart.filter(item => item.name !== name);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const listContainer = document.getElementById('cartItemsList');
+            const totalBadge = document.getElementById('cartBadgeCount');
+            const totalDisplay = document.getElementById('cartTotalPrice');
+            
+            if (cart.length === 0) {
+                listContainer.innerHTML = `<p style="color: #888; text-align: center; margin-top: 30px;">Your cart is empty.</p>`;
+                totalBadge.innerText = '0';
+                totalDisplay.innerText = '0 UGX';
+                return;
+            }
+
+            let totalItems = 0;
+            let totalPrice = 0;
+            listContainer.innerHTML = '';
+
+            cart.forEach(item => {
+                totalItems += item.quantity;
+                totalPrice += (item.price * item.quantity);
+
+                listContainer.innerHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <span>${item.quantity} x ${item.price.toLocaleString()} UGX</span>
+                        </div>
+                        <i class="fa-solid fa-trash cart-item-remove" onclick="removeCartItem('${item.name}')"></i>
+                    </div>
+                `;
+            });
+
+            totalBadge.innerText = totalItems;
+            totalDisplay.innerText = totalPrice.toLocaleString() + ' UGX';
+        }
+
+        // Direct Route to Checkout Page (No Account Choice)
+        function proceedToCheckout() {
+            if (cart.length === 0) {
+                alert("Your cart is empty! Add some items before checking out.");
+                return;
+            }
+            
+            // 1. Save cart to browser memory
+            localStorage.setItem('taataOwenCart', JSON.stringify(cart));
+            
+            // 2. Clear out sidebar state
+            closeCartMenu();
+            
+            // 3. Immediately open the checkout page
+            window.location.href = "guest-checkout.html";
+        }
+    </script>
+</body>
+</html>

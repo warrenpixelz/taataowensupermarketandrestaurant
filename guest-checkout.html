@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Checkout | Taata Owen</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- 1. ADDED: Load official Supabase Client SDK via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        .checkout-container {
+            max-width: 1000px;
+            margin: 120px auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container { grid-template-columns: 1fr; margin-top: 90px; }
+        }
+
+        .checkout-form-section, .order-summary-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--primary-color, #2c3e50);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f4f6f7;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--secondary-color, #ff6b00); outline: none; }
+
+        .summary-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 0.95rem; }
+        .summary-item span { color: #555; }
+        .summary-item strong { color: #222; }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #ddd;
+            color: var(--primary-color, #2c3e50);
+        }
+
+        .submit-order-btn {
+            width: 100%;
+            background: var(--secondary-color, #ff6b00);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .submit-order-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .back-to-shop { display: inline-flex; align-items: center; gap: 5px; color: var(--primary-color, #2c3e50); text-decoration: none; font-weight: 600; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="navbar">
+            <div class="logo">Taata Owen</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Shop</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="checkout-container">
+        <section class="checkout-form-section">
+            <a href="services.html" class="back-to-shop"><i class="fa-solid fa-arrow-left"></i> Back to Shop</a>
+            <h2><i class="fa-solid fa-truck"></i> Delivery Information</h2>
+            
+            <form id="deliveryForm" onsubmit="handleOrderSubmission(event)">
+                <div class="form-group">
+                    <label for="fullName">Your Full Name</label>
+                    <input type="text" id="fullName" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number</label>
+                    <input type="tel" id="phoneNumber" placeholder="e.g. 07XXXXXXXX" required>
+                </div>
+                <div class="form-group">
+                    <label for="deliveryAddress">Delivery Address / Key Landmark</label>
+                    <textarea id="deliveryAddress" rows="3" placeholder="e.g. Muyenga, near the university hostel" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="orderNotes">Special Instructions (Optional)</label>
+                    <textarea id="orderNotes" rows="2" placeholder="e.g. Call before arriving."></textarea>
+                </div>
+            </form>
+        </section>
+
+        <section class="order-summary-section">
+            <h2><i class="fa-solid fa-receipt"></i> Order Summary</h2>
+            <div id="checkoutItemsList"></div>
+            <div class="total-row">
+                <span>Total Bill:</span>
+                <span id="checkoutTotalAmount">0 UGX</span>
+            </div>
+            <button type="submit" form="deliveryForm" id="submitBtn" class="submit-order-btn">
+                Confirm & Deliver Order <i class="fa-solid fa-circle-check"></i>
+            </button>
+        </section>
+    </main>
+
+    <script>
+        // 1. Initialize Supabase
+const SUPABASE_URL = "https://idtxmjpanauclcjutagt.supabase.co"; 
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkdHhtanBhbmF1bGNjanV0YWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzE1MjgsImV4cCI6MjA5NzAwNzUyOH0.LYNtn6FXIoX4DnrygmEbM15H9G5shiWHzwCat8WYiRk";        
+
+// Note: Using window.supabase for CDN compatibility
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let checkoutCart = [];
+let grandTotal = 0;
+
+window.addEventListener('DOMContentLoaded', () => {
+    const savedData = localStorage.getItem('taataOwenCart');
+    if (!savedData || JSON.parse(savedData).length === 0) {
+        alert("Your cart is empty!");
+        window.location.href = "services.html";
+        return;
+    }
+    checkoutCart = JSON.parse(savedData);
+    renderSummaryLayout();
+});
+
+function renderSummaryLayout() {
+    const itemsContainer = document.getElementById('checkoutItemsList');
+    const totalDisplay = document.getElementById('checkoutTotalAmount');
+    
+    grandTotal = 0;
+    itemsContainer.innerHTML = '';
+
+    checkoutCart.forEach(item => {
+        const itemCost = item.price * item.quantity;
+        grandTotal += itemCost;
+        itemsContainer.innerHTML += `
+            <div class="summary-item">
+                <span>${item.name} <strong>(x${item.quantity})</strong></span>
+                <strong>${itemCost.toLocaleString()} UGX</strong>
+            </div>
+        `;
+    });
+    totalDisplay.innerText = grandTotal.toLocaleString() + ' UGX';
+}
+
+// 2. The Final Submission Logic
+async function handleOrderSubmission(event) {
+    event.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Processing... <i class="fa-solid fa-spinner fa-spin"></i>';
+
+    const customerName = document.getElementById('fullName').value;
+    const customerPhone = document.getElementById('phoneNumber').value;
+    const deliveryLocation = document.getElementById('deliveryAddress').value;
+    const specialNotes = document.getElementById('orderNotes').value;
+
+    try {
+        // Look closely at the brackets here - this is usually where the error lives!
+        const { data, error } = await supabaseClient
+            .from('orders')
+            .insert([
+                {
+                    customer_name: customerName,
+                    customer_phone: customerPhone,
+                    delivery_address: deliveryLocation,
+                    special_notes: specialNotes,
+                    items: checkoutCart,
+                    total_bill: grandTotal
+                }
+            ]);
+
+        
+
+        
+        localStorage.removeItem('taataOwenCart');
+        window.location.href = "success.html";
+
+    } catch (error) {
+        console.error("Submission Error:", error);
+        alert("Could not save order. Check your internet or Supabase settings.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirm & Deliver Order <i class="fa-solid fa-circle-check"></i>';
+    }
+}
+    </script>
+</body>
+</html>
