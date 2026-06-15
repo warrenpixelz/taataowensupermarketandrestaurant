@@ -140,8 +140,8 @@
 
     <script>
         // 1. Initialize Supabase
-const SUPABASE_URL = "https://idtxmjpanauclcjutagt.supabase.co"; 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkdHhtanBhbmF1bGNjanV0YWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzE1MjgsImV4cCI6MjA5NzAwNzUyOH0.LYNtn6FXIoX4DnrygmEbM15H9G5shiWHzwCat8WYiRk";        
+const SUPABASE_URL = "https://idtxmjpanaulccjutagt.supabase.co"; 
+const SUPABASE_ANON_KEY = "sb_publishable_HR07WQRlp3k6P9uR2ai_rw_bQyaZjys";        
 
 // Note: Using window.supabase for CDN compatibility
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -204,19 +204,27 @@ async function handleOrderSubmission(event) {
                     delivery_address: deliveryLocation,
                     special_notes: specialNotes,
                     items: checkoutCart,
-                    total_bill: grandTotal
+                    total_bill: Number(grandTotal)
                 }
             ]);
+            if (error) {
+                console.error("Supabase Database Error Details:", error);
+                alert(`Database Error: ${error.message}`);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Confirm & Deliver Order <i class="fa-solid fa-circle-check"></i>';
+                return;
+            }
+
 
         
 
-        
+        console.log("Order saved successfully!");
         localStorage.removeItem('taataOwenCart');
         window.location.href = "success.html";
 
     } catch (error) {
         console.error("Submission Error:", error);
-        alert("Could not save order. Check your internet or Supabase settings.");
+        alert("System Error: " + error.message + "\n" + JSON.stringify(error));
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Confirm & Deliver Order <i class="fa-solid fa-circle-check"></i>';
     }
