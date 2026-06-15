@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supermarket & Restaurant | Taata Owen</title>
+    <title>Supermarket & Restaurant | Taata Owen supermarket and restaurant</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -71,11 +71,12 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            
         }
+        
         .product-img img {
             width: 100%;
             height: 100%;
+            object-fit: cover; /* Keeps aspect ratio clean without stretching */
             object-position: center;
         }
 
@@ -268,18 +269,22 @@
 
     <header>
         <nav class="navbar">
-            <div class="logo">Taata Owen</div>
+            <div class="logo">Taata Owen Supermarket and Restaurant</div>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="services.html" class="active">Shop</a></li>
+                <li><a href="#about">About</a></li>
                 <li><a href="contact.html">Contact</a></li>
             </ul>
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fa-solid fa-bars"></i>
+            </div>
         </nav>
     </header>
 
     <div class="services-banner">
         <h1>Supermarket & Restaurant Catalog</h1>
-        <p>Pick your items from our menu or fresh shelves and add them directly to your order cart.</p>
+        <p>A variety of products and dishes await for you in our Supermarket and Restaurant.<br>Pick what you need and leave the hard work for us till at your doorsteps</p>
     </div>
 
     <!-- Filter Category Tabs -->
@@ -292,11 +297,11 @@
     <!-- Products Catalog Grid -->
     <main class="catalog-container">
         
-        <!-- Product Template Card 1 -->
+        <!-- Product 1 -->
         <div class="product-card">
             <div class="product-img">
                 <img src="pilau.jpg" alt="Pilau Rice & Beef">
-                <i class="fa-solid fa-bowl-food"></i></div>
+            </div>
             <div class="product-details">
                 <div>
                     <h3>Pilau Rice & Beef</h3>
@@ -309,11 +314,11 @@
             </div>
         </div>
 
-        <!-- Product Template Card 2 -->
+        <!-- Product 2 -->
         <div class="product-card">
             <div class="product-img">
                 <img src="passion juice.jpg" alt="Fresh Passion Juice (1L)">
-                <i class="fa-solid fa-bottle-water"></i></div>
+            </div>
             <div class="product-details">
                 <div>
                     <h3>Fresh Passion Juice (1L)</h3>
@@ -326,11 +331,11 @@
             </div>
         </div>
 
-        <!-- Product Template Card 3 -->
+        <!-- Product 3 -->
         <div class="product-card">
             <div class="product-img">
                 <img src="sugar.jpg" alt="Premium Sugar (1KG)">
-                <i class="fa-solid fa-cubes-stacked"></i></div>
+            </div>
             <div class="product-details">
                 <div>
                     <h3>Premium Sugar (1KG)</h3>
@@ -405,7 +410,7 @@
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {
-                cart.push({ name, price, quantity: 1 });
+                cart.push({ name, price: Number(price), quantity: 1 });
             }
             updateCartUI();
         }
@@ -450,7 +455,7 @@
             totalDisplay.innerText = totalPrice.toLocaleString() + ' UGX';
         }
 
-        // Direct Route to Checkout Page (No Account Choice)
+        // Direct Route to Checkout Page
         function proceedToCheckout() {
             if (cart.length === 0) {
                 alert("Your cart is empty! Add some items before checking out.");
