@@ -180,9 +180,10 @@ function renderSummaryLayout() {
     totalDisplay.innerText = grandTotal.toLocaleString() + ' UGX';
 }
 
-// 2. The Final Submission Logic
+Q// 2. The Final Submission Logic
 async function handleOrderSubmission(event) {
     event.preventDefault();
+    console.log("Form submission triggered.");
     
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
@@ -194,7 +195,7 @@ async function handleOrderSubmission(event) {
     const specialNotes = document.getElementById('orderNotes').value;
 
     try {
-        // Look closely at the brackets here - this is usually where the error lives!
+        // ✅ CONFIGURED COMPLETELY: Making sure the chain isn't cut off or broken
         const { data, error } = await supabaseClient
             .from('orders')
             .insert([
@@ -207,24 +208,22 @@ async function handleOrderSubmission(event) {
                     total_bill: Number(grandTotal)
                 }
             ]);
-            if (error) {
-                console.error("Supabase Database Error Details:", error);
-                alert(`Database Error: ${error.message}`);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Confirm & Deliver Order <i class="fa-solid fa-circle-check"></i>';
-                return;
-            }
 
+        if (error) {
+            console.error("Supabase Database Return Error:", error);
+            alert("Database Error: " + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Confirm & Deliver Order <i class="fa-solid fa-circle-check"></i>';
+            return;
+        }
 
-        
-
-        console.log("Order saved successfully!");
+        console.log("Success! Data confirmed by Supabase.");
         localStorage.removeItem('taataOwenCart');
         window.location.href = "success.html";
 
     } catch (error) {
-        console.error("Submission Error:", error);
-        alert("System Error: " + error.message + "\n" + JSON.stringify(error));
+        console.error("Catch Block Network Trigger:", error);
+        alert("Network communication failure. Please check your connection.");
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Confirm & Deliver Order <i class="fa-solid fa-circle-check"></i>';
     }
